@@ -6,8 +6,8 @@ function Home() {
   const [uploadResultMessage, setUploadResultMessage] = useState('Image is Authenticating...');
   const [visitorName, setVisitorName] = useState('placeholder.jpeg');
   const [isAuth, setAuth] = useState(false);
-  const [isCameraActive, setIsCameraActive] = useState(true); // To control camera state
-  const [capturedImage, setCapturedImage] = useState(null); // To store the captured image
+  const [isCameraActive, setIsCameraActive] = useState(true); 
+  const [capturedImage, setCapturedImage] = useState(null); 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -16,7 +16,7 @@ function Home() {
       .getUserMedia({ video: true })
       .then((stream) => {
         videoRef.current.srcObject = stream;
-        setIsCameraActive(true); // Camera is now active
+        setIsCameraActive(true);
       })
       .catch((err) => {
         console.error('Error accessing camera: ', err);
@@ -29,21 +29,19 @@ function Home() {
     const context = canvas.getContext('2d');
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    // Turn the captured canvas image into a blob
     canvas.toBlob((blob) => {
       const visitorImageName = uuid.v4();
       setVisitorName(`${visitorImageName}.jpeg`);
 
-      // Create a URL for the captured image and stop the camera
       const capturedImageUrl = URL.createObjectURL(blob);
       setCapturedImage(capturedImageUrl);
-      setIsCameraActive(false); // Turn off the camera
+      setIsCameraActive(false); 
       sendImageToAWS(blob, visitorImageName);
     }, 'image/jpeg');
   };
 
   const sendImageToAWS = (imageBlob, visitorImageName) => {
-    fetch(`https://48cc83boci.execute-api.us-east-1.amazonaws.com/dev/pjt-visitor-image-storage/${visitorImageName}.jpeg`, {
+    fetch(`aws-api-gateway-http-link`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'image/jpeg',
@@ -68,7 +66,7 @@ function Home() {
   };
 
   async function authenticate(visitorImageName) {
-    const requestUrl = `https://48cc83boci.execute-api.us-east-1.amazonaws.com/dev/employee?${new URLSearchParams({
+    const requestUrl = `"aws-api-gateway-http-link"?${new URLSearchParams({
       objectKey: `${visitorImageName}.jpeg`,
     })}`;
     return await fetch(requestUrl, {
@@ -83,14 +81,14 @@ function Home() {
       .catch((error) => console.error(error));
   }
   const resetState = () => {
-    window.location.reload(); // This will reload the entire page
+    window.location.reload();
   };
   return (
     <div className="App">
       <div className="container">
         <h2 className="title">IMAGE AUTHENTICATION</h2>
 
-        {/* Show the camera feed if it's active */}
+        
         {isCameraActive ? (
           <>
             <button className="btn start-btn" onClick={startCamera}>Start Camera</button>
@@ -103,7 +101,7 @@ function Home() {
             </form>
           </>
         ) : (
-          // Show the captured image if the camera is off
+          
           <div className="image-container">
             <img src={capturedImage} alt="Captured" className="captured-image" />
             <div className={isAuth ? 'auth-message success' : 'auth-message failure'}>
@@ -111,7 +109,6 @@ function Home() {
             </div>
           </div>
         )}
-        {/* Reset button */}
         <button className="btn reset-btn" onClick={resetState}>Reset</button>
       </div>
     </div>
